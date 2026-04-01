@@ -1893,7 +1893,16 @@ const PACKING_LIST = [
 // =====================================================
 const EXPLORE = [
   {
-    name:"La Lonja de la Seda (Silk Exchange)",
+    name:"Church of San Nicolás de Bari and San Pedro Mártir",
+    icon:"⛪",
+    tag:"Valencia's Sistine Chapel · €8 entry",
+    coords:[39.4748,-0.3807],
+    hours:"Mon–Fri 10:30 AM – 7:30 PM; Sat 10:30 AM – 8 PM; Sun 1 PM – 7:30 PM",
+    transit:"Walk from hotel ~25 min through old town. Metro L1/L5 to Àngel Guimerà, or Bus lines 5, 8, 95. Steps from La Lonja and Mercado Central.",
+    tip:"Book tickets online in advance — timed entry sells out, especially on weekends. The interior is jaw-dropping; allow at least 45 min. Best combined with La Lonja and Mercado Central in the same morning walk.",
+    desc:"One of Valencia's most spectacular hidden gems, and easily one of the most beautiful church interiors in all of Spain. Often called the 'Valencian Sistine Chapel,' the entire ceiling and walls are covered in extraordinary frescoes painted by Antonio Palomino in the early 1700s — swirling Baroque figures, saints, and heavenly scenes that seem to dissolve the ceiling into sky. The church itself dates to the 13th century (built on the site of a mosque shortly after the Christian reconquest of Valencia) but the Gothic bones were almost entirely encased in this breathtaking Baroque decorative program. Remarkably, it was nearly forgotten for centuries and only fully restored in 2016 — making it feel like a genuine discovery. Entry is €8 and timed tickets are required."
+  },
+
     icon:"🏛️",
     tag:"UNESCO World Heritage · €2 entry",
     coords:[39.4731,-0.3790],
@@ -2083,10 +2092,10 @@ function renderHome(){
         <div class="qt-title">Today's Schedule</div>
         <div class="qt-val">Tap to view</div>
       </div>
-      <div class="quick-tile" onclick="switchTab('map')">
-        <div class="qt-icon">📍</div>
-        <div class="qt-title">Map & Locations</div>
-        <div class="qt-val">All 40+ pins</div>
+      <div class="quick-tile" onclick="switchTab('tools');switchToolsTab('explore')">
+        <div class="qt-icon">🗺️</div>
+        <div class="qt-title">Explore Valencia</div>
+        <div class="qt-val">${EXPLORE.length} bonus spots</div>
       </div>
       <div class="quick-tile" onclick="switchTab('tools');switchToolsTab('wallet')">
         <div class="qt-icon">💶</div>
