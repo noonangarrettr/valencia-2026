@@ -1993,6 +1993,7 @@ const S = {
   cachedRate: null,   // {rate, ts}
   weather: null,
   convertAmt: '',
+  convDir: 'usd2eur',  // 'usd2eur' or 'eur2usd'
   expenses: [],
   hydration: 0,
   learned: new Set(),
@@ -2460,41 +2461,59 @@ function switchWalletTab(tab){ S.walletTab=tab; renderTools(); }
 function renderConverter(){
   const rate = S.cachedRate ? S.cachedRate.rate : 0.93;
   const amt = parseFloat(S.convertAmt)||0;
-  const eur = (amt * rate).toFixed(2);
+  const usd2eur = S.convDir === 'usd2eur';
+  const converted = usd2eur ? (amt * rate).toFixed(2) : (amt / rate).toFixed(2);
+  const fromSymbol = usd2eur ? '$' : '€';
+  const toSymbol   = usd2eur ? '€' : '$';
+  const fromLabel  = usd2eur ? 'USD Amount' : 'EUR Amount';
   const ts = S.cachedRate ? new Date(S.cachedRate.ts).toLocaleDateString() : 'estimated';
   const isOffline = !S.cachedRate;
-  const quickAmts = [1,5,10,20,50,100,500];
+  const quickAmts = usd2eur ? [1,5,10,20,50,100,500] : [1,5,10,20,50,100,200];
+  const rateLabel = usd2eur ? `1 USD = €${rate.toFixed(4)}` : `1 EUR = $${(1/rate).toFixed(4)}`;
   return `<div class="conv-hero">
-    <div class="conv-label">USD Amount</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="conv-label" style="margin-bottom:0">${fromLabel}</div>
+      <button onclick="toggleConvDir()" style="background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;">
+        ${usd2eur ? '$ USD → € EUR' : '€ EUR → $ USD'} &nbsp;⇄
+      </button>
+    </div>
     <div class="conv-input-row">
-      <span class="conv-symbol">$</span>
+      <span class="conv-symbol">${fromSymbol}</span>
       <input class="conv-input" id="conv-input" type="number" inputmode="decimal" placeholder="0.00" value="${S.convertAmt}" oninput="updateConversion(this.value)">
     </div>
-    <div class="conv-result">€ ${amt>0?eur:'—'}</div>
-    <div class="conv-rate">1 USD = €${rate.toFixed(4)} · Rate from: ${ts} ${isOffline?'(offline estimate)':''}</div>
+    <div class="conv-result">${toSymbol} ${amt>0?converted:'—'}</div>
+    <div class="conv-rate">${rateLabel} · Rate from: ${ts} ${isOffline?'(offline estimate)':''}</div>
     ${isOffline?`<div class="conv-offline">📴 Offline mode — using estimated rate</div>`:''}
-    <div style="margin-top:10px;text-align:center"><button onclick="fetchRate()" style="background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">🔄 Refresh Rate</button></div>
+    <div style="margin-top:10px;text-align:center"><button onclick="fetchRate()" style="background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600;font-family:inherit;">🔄 Refresh Rate</button></div>
   </div>
   <div class="quick-amts">
     <div style="width:100%;font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:4px">Quick Amounts:</div>
-    ${quickAmts.map(a=>`<div class="qa-chip ${S.convertAmt==a?'active':''}" onclick="updateConversion('${a}')">\$${a}</div>`).join('')}
+    ${quickAmts.map(a=>`<div class="qa-chip ${S.convertAmt==a?'active':''}" onclick="updateConversion('${a}')">${fromSymbol}${a}</div>`).join('')}
   </div>
   <div class="section" style="padding-top:0">
     <div class="info-box"><span class="ib-icon">💡</span><span class="ib-text">ATMs give the best exchange rates — better than airport kiosks. Tell your bank about your trip before leaving to prevent fraud blocks. Look for Bancaja, CaixaBank, or Santander ATMs.</span></div>
   </div>`;
 }
 
+function toggleConvDir(){
+  S.convDir = S.convDir === 'usd2eur' ? 'eur2usd' : 'usd2eur';
+  S.convertAmt = '';
+  renderTools();
+}
+
 function updateConversion(val){
   S.convertAmt = val;
   const rate = S.cachedRate ? S.cachedRate.rate : 0.93;
   const amt = parseFloat(val)||0;
-  const eur = (amt * rate).toFixed(2);
+  const usd2eur = S.convDir === 'usd2eur';
+  const converted = usd2eur ? (amt * rate).toFixed(2) : (amt / rate).toFixed(2);
+  const toSymbol = usd2eur ? '€' : '$';
+  const fromSymbol = usd2eur ? '$' : '€';
   const input = document.getElementById('conv-input');
   if(input && input.value !== val) input.value = val;
   const result = document.querySelector('.conv-result');
-  if(result) result.textContent = `€ ${amt>0?eur:'—'}`;
-  // update active chip
-  document.querySelectorAll('.qa-chip').forEach(c=>{ c.classList.toggle('active', c.textContent.replace('$','')==val); });
+  if(result) result.textContent = `${toSymbol} ${amt>0?converted:'—'}`;
+  document.querySelectorAll('.qa-chip').forEach(c=>{ c.classList.toggle('active', c.textContent.replace(fromSymbol,'')==val); });
 }
 
 async function fetchRate(){
